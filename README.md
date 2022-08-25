@@ -1,28 +1,15 @@
-[![PlatformIO](https://github.com/chrisjoyce911/esp32FOTA/workflows/PlatformIO/badge.svg)](https://github.com/chrisjoyce911/esp32FOTA/actions/)
-
-# esp32FOTA library for Arduino
+# esp32mOTA library for Arduino
 
 ## Purpose
 
-A simple library to add support for Over-The-Air (OTA) updates to your project.
+A simple library to add support for Over-The-Air (OTA) updates to your project with digital signature verification.
 
-## Features
+## Features / Todos
 
-- [x] Web update (requires web server)
-- [x] Batch firmware sync
-- [x] Force firmware update [issues 8]
-- [x] https support [#26][i26] ( Thanks to @fbambusi )
-- [x] Signature check of downloaded firmware-image [issue 65]
-- [x] https or https
-- [x] Signature verification
-- [x] Semantic versioning support
-- [ ] Checking for update via bin headers [issue 15]
-
-## Features and Improvements added by Tuan_Karma (Anthony)
-
-- [x] Using LitleFS instead of (deprecated) [SPIFFS](https://arduino-esp8266.readthedocs.io/en/latest/filesystem.html#spiffs-and-littlefs)
-- [x] Code improvements at `semver/semver.c` to eliminate the Compiler's warnings: e.g. `warning: passing argument 3 of 'concat_num' discards 'const' qualifier ...`
-- ...
+Minimify/Improve the code --> elegant and performance. Concentrating on two features: 
+- [ ] Security: Digital signature verification with public key embedded into firmware and updatable. 
+- [ ] Peformance: Eliminate unneccessary codes.
+- [ ] DeviceID in the get request for server's loging purpose 
 
 ## How it works
 
@@ -173,13 +160,11 @@ On the next update-check the ESP32 will download the `firmware.img` extract the 
 [issue 65]: https://github.com/chrisjoyce911/esp32FOTA/issues/65
 
 
-### Libraries
+### Dependencies
 
-This relies on [semver.c by h2non](https://github.com/h2non/semver.c) for semantic versioning support. semver.c is licensed under [MIT](https://github.com/h2non/semver.c/blob/master/LICENSE).
+- [semver.c by h2non](https://github.com/h2non/semver.c) for semantic versioning support. semver.c is licensed under [MIT](https://github.com/h2non/semver.c/blob/master/LICENSE).
+- [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 
 ### Thanks to 
+- The original of this library code was forked from [Chris Joyce's esp32FOTA](https://github.com/chrisjoyce911/esp32FOTA)
 
-* @nuclearcat
-* @thinksilicon
-* @nuclearcat 
-* @hpsaturn 
