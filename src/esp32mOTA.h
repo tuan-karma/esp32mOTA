@@ -1,7 +1,7 @@
 /*
    esp32 firmware OTA
    Date: December 2018
-   Author: Chris Joyce <https://github.com/chrisjoyce911/esp32FOTA/esp32FOTA>
+   Author: Chris Joyce <https://github.com/chrisjoyce911/esp32mOTA/esp32mOTA>
    Purpose: Perform an OTA update from a bin located on a webserver (HTTP Only)
 
    Date: 2021-12-21
@@ -21,44 +21,32 @@
     - Being able to update the rsa_key for the next version of your firmware conveniently.
 */
 
-#ifndef esp32fota_h
-#define esp32fota_h
+#ifndef esp32mota_h
+#define esp32mota_h
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
 #include "semver/semver.h"
 
-class esp32FOTA
+class esp32mOTA
 {
 public:
-  esp32FOTA(String firwmareType, int firwmareVersion, boolean validate = false, boolean allow_insecure_https = false);
-  esp32FOTA(String firwmareType, String firmwareSemanticVersion, boolean validate = false, boolean allow_insecure_https = false);
-  esp32FOTA(String firwmareType, String firmwareSemanticVersion, const unsigned char *public_key, size_t public_key_length, boolean allow_insecure_https = true);
-  ~esp32FOTA();
-  void forceUpdate(String firmwareHost, uint16_t firmwarePort, String firmwarePath, boolean validate);
-  void forceUpdate(String firmwareURL, boolean validate);
-  void forceUpdate(boolean validate);
+  esp32mOTA(const char* firwmareType, const char* firmwareSemanticVersion, const unsigned char *public_key, size_t public_key_length);
+  ~esp32mOTA();
   void execOTA();
-  void execOTA_internal();
-  bool execHTTPcheck();
+  bool execHTTPcheck(const String& json_url);
   int getPayloadVersion();
   void getPayloadVersion(char *version_string);
-  bool useDeviceID;
-  String checkURL;
-  bool validate_sig(unsigned char *signature, uint32_t firmware_size);
 
 private:
-  String getDeviceID();
-  String _firmwareType;
+  const char* _firmwareType;
   semver_t _firmwareVersion = {0};
   semver_t _payloadVersion = {0};
-  String _firmwareUrl;
-  boolean _check_sig;
+  String _firmwareURL;
   const unsigned char *_public_key = nullptr;
   size_t _public_key_length = 0;
-  boolean _allow_insecure_https;
   bool checkJSONManifest(JsonVariant JSONDocument);
-  bool validate_sig_internal(const unsigned char *signature, const uint32_t firmware_size);
+  bool validate_sig(const unsigned char *signature, const uint32_t firmware_size);
 };
 
 #endif
