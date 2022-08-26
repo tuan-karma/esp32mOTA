@@ -1,41 +1,39 @@
 /*
-Date: 2022-08-24
-Author: Nguyen Anh Tuan <https://github.com/tuan-karma>
-Feature added: use the rsa_pub_key.h to embed the key into the fimrware. This feature helps:
-- Preventing someone with physical access to your esp32-board altering the rsa_pub_key in the SPI flash memory 
-hence compromising the next firmware update.
-- Being able to update the rsa_key for the next version of your firmware conveniently. 
+This example demos the usage of `esp32mOTA` library - The minimalized for secure OTA firmware update for ESP32 chips.
 
-Usges:
-    + Gen the rsa_key.pub as raw format from openssl. 
-    + Copy and paste the raw content in rsa_key.pub into the space between a "Raw string literal" as seen above. 
-    + `R"~~~(<your_rsa_raw_text_here_without_any_extra_space_or_newline)~~~"` 
-    + Include the `...rsa_pub_key.h` only in your main.cpp code. And use the API as seen in this example.
-
-Local server using python:
-- `python -m http.server --help`
+Steps:
+- Preparing your rsa key pair using openssl (see the README.md on the github for details.)
+- Preparing a local or remote http server (local server using python in this example.)
+- Write the code in the main.cpp file using esp32mOTA's APIs as in this file.
+- Compose the firmwares.json file as seen in this folder.
+- Compile the code on PIO --> copy the `<your_pio_project_dir>/.pio/build/<your_board_name>/firmware.bin` into a separate Directory. 
+    It's recommended that you should place the firmware.bin file and rsa_key.pem files in the same directory for sigining convenience.
+- Sign the firmware.bin (and concat the signature into) --> firmware.img. 
+- Place `firmware.img` and `firmwares.json` into the above server's files directory.
+- Run the http server, burn the initial code into your ESP32 board, and perform the OTA update test (with the increment of your firmware version).
 
 */
 
 #include <Arduino.h>
-#include <esp32fota.h>
+#include <esp32mOTA.h>
 #include <WiFi.h>
-#include <LittleFS.h>
 #include "ota_rsa_pub_key.h"
 namespace
 {
     const char *ssid = "VTCC";
     const char *pass = "vtcc40pbc";
-    const char *current_version = "0.1.2";
+
+    const char *firmware_type = "m5stack_FOTA";
+    const char *current_version = "0.1.6";
+    const char *check_fw_URL = "http://10.130.0.141:8000/firmwares.json";
+    String json_url(check_fw_URL);
 }
 
-esp32FOTA mOTA("m5stack_FOTA", current_version, rsa_pub_key, sizeof(rsa_pub_key), true);
+esp32mOTA mOTA(firmware_type, current_version, rsa_pub_key, sizeof(rsa_pub_key));
 
 void setup_wifi()
 {
     delay(10);
-    // LittleFS.begin(false);
-    
     Serial.printf("Connecting to %s ", ssid);
     WiFi.begin(ssid, pass);
     while (WiFi.status() != WL_CONNECTED)
@@ -48,19 +46,21 @@ void setup_wifi()
 
 void setup()
 {
-    mOTA.checkURL = "http://10.130.0.141:8000/firmwares.json";
     Serial.begin(115200);
     Serial.println(current_version);
     setup_wifi();
+
+    json_url += "?id=";
+    json_url += ESP.getEfuseMac();
 }
 
 void loop()
 {
-    bool updateNeeded = mOTA.execHTTPcheck();
+    bool updateNeeded = mOTA.execHTTPcheck(json_url);
     if (updateNeeded)
     {
         Serial.println("A newer firmware version was found --> update");
-        mOTA.execOTA_internal();
+        mOTA.execOTA();
     }
     delay(2000);
 }

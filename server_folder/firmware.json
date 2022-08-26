@@ -1,0 +1,5 @@
+{
+    "type": "m5stack_FOTA",
+    "version": "0.1.6",
+    "url": "http://10.130.0.141:8000/m5stack/firmware.img"
+}
