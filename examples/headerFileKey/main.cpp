@@ -20,8 +20,8 @@ Steps:
 #include "ota_rsa_pub_key.h"
 namespace
 {
-    const char *ssid = "VTCC";
-    const char *pass = "vtcc40pbc";
+    const char *ssid = "xxx";
+    const char *pass = "xxx";
 
     const char *firmware_type = "m5stack_FOTA";
     const char *current_version = "0.1.6";
