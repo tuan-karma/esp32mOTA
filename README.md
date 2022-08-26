@@ -79,7 +79,7 @@ A single JSON file can provide information on multiple firmware types by combini
 
 Types are used to compare with the current loaded firmware, this is used to make sure that when loaded, the device will still do the intended job.
 
-As an example, a device used as a data logger should ony be updated with new versions of the data logger.
+As an example, a device used as a data logger should only be updated with new versions of the data logger.
 
 ##### examples
 
@@ -164,7 +164,7 @@ You can sign your firmware image with an RSA public/private key pair and have th
 it switches over to the new image.
 Provide your public key in a header file and place it at the same folder with main.cpp. 
 
-`ota_rsa_pub_key.h` for this example:
+`ota_rsa_pub_key.h` format example:
 
 ```cpp
 static const unsigned char rsa_pub_key[] = R"~~~(-----BEGIN PUBLIC KEY-----
