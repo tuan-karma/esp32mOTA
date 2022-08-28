@@ -229,18 +229,21 @@ void esp32mOTA::execOTA()
             {
                 client.readBytes(signature, 512);
             }
-            Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quiet for a while.. Patience!");
+            // Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quiet for a while.. Patience!");
+            log_i("Begin OTA. This may take 2 - 5 mins to complete. Things might be quiet for a while.. Patience!");
             // No activity would appear on the Serial monitor
             // So be patient. This may take 2 - 5mins to complete
             size_t written = Update.writeStream(client);
 
             if (written == contentLength)
             {
-                Serial.println("Written : " + String(written) + " successfully");
+                // Serial.println("Written : " + String(written) + " successfully");
+                log_i("Written: %d successsfully!", written);
             }
             else
             {
-                Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?");
+                // Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?");
+                log_i("Written only: %d/%d. Retry?", written, contentLength);
                 // retry??
                 // execOTA();
             }
@@ -265,21 +268,21 @@ void esp32mOTA::execOTA()
                         log_i("Signature OK");
                     }
                 }
-                Serial.println("OTA done!");
+                log_i("OTA done!");
                 if (Update.isFinished())
                 {
-                    Serial.println("Update successfully completed. Rebooting.");
+                    log_i("Update successfully completed. Rebooting.");
                     http.end();
                     ESP.restart();
                 }
                 else
                 {
-                    Serial.println("Update not finished? Something went wrong!");
+                    log_e("Update not finished? Something went wrong!");
                 }
             }
             else
             {
-                Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+                log_e("Error Occurred. Error #: %d", Update.getError());
             }
         }
         else
@@ -287,7 +290,7 @@ void esp32mOTA::execOTA()
             // not enough space to begin OTA
             // Understand the partitions and
             // space availability
-            Serial.println("Not enough space to begin OTA");
+            log_e("Not enough space to begin OTA");
             http.end();
         }
     }
@@ -436,22 +439,8 @@ bool esp32mOTA::execHTTPcheck(const String& json_url)
     }
     else
     {
-        log_e("Error on HTTP request");
+        log_e("Error on HTTP request: %d", httpCode);
         http.end();
         return false;
     }
-}
-
-/**
- * This function return the new version of new firmware
- */
-int esp32mOTA::getPayloadVersion()
-{
-    log_w("int esp32mOTA::getPayloadVersion() only returns the major version from semantic version strings. Use void esp32mOTA::getPayloadVersion(char * version_string) instead!");
-    return _payloadVersion.major;
-}
-
-void esp32mOTA::getPayloadVersion(char *version_string)
-{
-    semver_render(&_payloadVersion, version_string);
 }

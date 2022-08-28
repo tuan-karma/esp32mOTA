@@ -12,7 +12,7 @@ Minimify/Improve the code --> elegant and performance. Concentrating on two feat
 - [x] DeviceID in the get request for server's loging purpose 
 
 ## Todos
-- [ ] Test: Using a github repo as the https server for the firmwares.
+- [x] Test: Using a github repo as the https server for the firmwares.
 - [ ] Secure OTA config solution: Develop dynamically OTA config scheme with signature check for esp32 --> store key value in NVS partition.
 
 
@@ -98,7 +98,7 @@ In this example a version 0.1.5  of firmware is currently in your ESP32 board, i
 
 `firmwares.json` for this example:
 
-```markdown
+```json
 {
     "type": "m5stack_FOTA",
     "version": "0.1.6",
@@ -186,7 +186,7 @@ RsvhLheT146a+Cba80NApvsCAwEAAQ==
 
 Create a key-pair to sign your firmware image:
 ```
-openssl genrsa -out priv_key.pem 4096
+openssl genrsa -aes256 -out priv_key.pem 4096
 openssl rsa -in priv_key.pem -pubout > rsa_key.pub
 ```
 

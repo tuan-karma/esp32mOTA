@@ -35,8 +35,6 @@ public:
   ~esp32mOTA();
   void execOTA();
   bool execHTTPcheck(const String& json_url);
-  int getPayloadVersion();
-  void getPayloadVersion(char *version_string);
 
 private:
   const char* _firmwareType;
