@@ -50,10 +50,6 @@ esp32mOTA::esp32mOTA(const char *firmwareType, const char* firmwareSemanticVersi
         log_e("Invalid semver string %s passed to constructor. Defaulting to 0", firmwareSemanticVersion);
         _firmwareVersion = semver_t{0};
     }
-
-    char version_no[256] = {'\0'};
-    semver_render(&_firmwareVersion, version_no);
-    log_i("Current firmware version: %s", version_no);
 }
 
 // Check file signature
@@ -199,13 +195,14 @@ void esp32mOTA::execOTA()
         // Connect to webserver failed
         // May be try?
         // Probably a choppy network?
-        log_i("Connection to %s failed. Please check your setup", _firmwareURL);
+        log_i("Connection to %s failed.", _firmwareURL);
+        log_i("HTTP CODE returned: %d", httpCode);
         // retry??
         // execOTA();
     }
 
     // Check what is the contentLength and if content type is `application/octet-stream`
-    log_i("contentLength : %i, isValidContentType : %s", contentLength, isValidContentType ? "true" : "false");
+    log_d("contentLength : %i, isValidContentType : %s", contentLength, isValidContentType ? "true" : "false");
 
     // check contentLength and content type
     if (contentLength && isValidContentType)
@@ -229,20 +226,17 @@ void esp32mOTA::execOTA()
             {
                 client.readBytes(signature, 512);
             }
-            // Serial.println("Begin OTA. This may take 2 - 5 mins to complete. Things might be quiet for a while.. Patience!");
-            log_i("Begin OTA. This may take 2 - 5 mins to complete. Things might be quiet for a while.. Patience!");
+            log_i("Begin OTA. This may take 2 - 5 mins to complete. Device might be quiet for a while.. Patience!");
             // No activity would appear on the Serial monitor
             // So be patient. This may take 2 - 5mins to complete
             size_t written = Update.writeStream(client);
 
             if (written == contentLength)
             {
-                // Serial.println("Written : " + String(written) + " successfully");
                 log_i("Written: %d successsfully!", written);
             }
             else
             {
-                // Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?");
                 log_i("Written only: %d/%d. Retry?", written, contentLength);
                 // retry??
                 // execOTA();
@@ -307,20 +301,19 @@ bool esp32mOTA::checkJSONManifest(JsonVariant JSONDocument)
     if (strcmp(JSONDocument["type"].as<const char *>(), _firmwareType) != 0)
     {
         log_i("Payload type in manifest %s doesn't match current firmware %s", JSONDocument["type"].as<const char *>(), _firmwareType);
-        log_i("Doesn't match type: %s", _firmwareType);
         return false; // Move to the next entry in the manifest
     }
-    log_i("Payload type in manifest %s matches current firmware %s", JSONDocument["type"].as<const char *>(), _firmwareType);
+    log_d("Payload type in manifest %s matches current firmware %s", JSONDocument["type"].as<const char *>(), _firmwareType);
 
     semver_free(&_payloadVersion);
     if (JSONDocument["version"].is<uint16_t>())
     {
-        log_i("JSON version: %d (int)", JSONDocument["version"].as<uint16_t>());
+        log_d("JSON version: %d (int)", JSONDocument["version"].as<uint16_t>());
         _payloadVersion = semver_t{JSONDocument["version"].as<uint16_t>()};
     }
     else if (JSONDocument["version"].is<const char *>())
     {
-        log_i("JSON version: %s (semver)", JSONDocument["version"].as<const char *>());
+        log_d("JSON version: %s (semver)", JSONDocument["version"].as<const char *>());
         if (semver_parse(JSONDocument["version"].as<const char *>(), &_payloadVersion))
         {
             log_e("Invalid semver string received in manifest. Defaulting to 0");
@@ -333,9 +326,9 @@ bool esp32mOTA::checkJSONManifest(JsonVariant JSONDocument)
         _payloadVersion = semver_t{0};
     }
 
-    char version_no[256] = {'\0'};
-    semver_render(&_payloadVersion, version_no);
-    log_i("Payload firmware version: %s", version_no);
+    // char version_no[256] = {'\0'};
+    // semver_render(&_payloadVersion, version_no);
+    // log_d("Payload firmware version: %s", version_no);
 
     if (JSONDocument["url"].is<String>())
     {
@@ -372,8 +365,7 @@ bool esp32mOTA::checkJSONManifest(JsonVariant JSONDocument)
 
 bool esp32mOTA::execHTTPcheck(const String& json_url)
 {
-    log_i("Getting HTTP: %s", json_url.c_str());
-    log_i("------");
+    log_d("GET HTTP to check: %s", json_url.c_str());
     if ((WiFi.status() != WL_CONNECTED))
     { // Check the current connection status
         log_w("WiFi not connected - skipping HTTP check");
@@ -395,6 +387,8 @@ bool esp32mOTA::execHTTPcheck(const String& json_url)
     {
         http.begin(json_url); // Specify the URL
     }
+    http.addHeader("Cache-Control", "no-cache");
+    http.addHeader("Pragma", "no-cache");
     int httpCode = http.GET(); // Make the request
 
     if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)

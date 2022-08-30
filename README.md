@@ -13,6 +13,7 @@ Minimify/Improve the code --> elegant and performance. Concentrating on two feat
 
 ## Todos
 - [x] Test: Using a github repo as the https server for the firmwares.
+- [ ] Improve code: log_level 4 --> log_d 
 - [ ] Secure OTA config solution: Develop dynamically OTA config scheme with signature check for esp32 --> store key value in NVS partition.
 
 
